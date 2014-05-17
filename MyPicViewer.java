@@ -7,9 +7,10 @@ import java.util.*;
 
 abstract class CommandsViewFrame extends JFrame implements ActionListener {
 	final JScrollPane scrollpane = new JScrollPane();
-	final JPanel toolbar = new JPanel();
+	final JToolBar toolbar = new JToolBar();
+	final JLabel status = new JLabel();
 
-	public CommandsViewFrame(String title, int width, int height, String [] commands, String [] icons, String commandPosition) {
+	public CommandsViewFrame(String title, int width, int height, String [] commands, String [] icons) {
 		Container cp = this.getContentPane();
 
 		// 工具栏
@@ -18,18 +19,18 @@ abstract class CommandsViewFrame extends JFrame implements ActionListener {
 			btn.addActionListener(this);
 			this.toolbar.add(btn);
 		}
-		cp.add(this.toolbar, commandPosition);
+		cp.add(this.toolbar, BorderLayout.NORTH);
 
 		// 工作区
 		cp.add(this.scrollpane, BorderLayout.CENTER);
+
+		// 状态栏
+		cp.add(this.status, BorderLayout.SOUTH);
 
 		// 窗口属性
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		setSize(width, height);
 		setTitle(title);
-	}
-
-	void createToolbar(String [] commands) {
 	}
 
 	public void setView(JComponent view) {
@@ -40,6 +41,10 @@ abstract class CommandsViewFrame extends JFrame implements ActionListener {
 		for (int i = 0; i < enabled.length; i++) {
 			this.toolbar.getComponent(i).setEnabled(enabled[i]);
 		}
+	}
+
+	public void setStatus(String status) {
+		this.status.setText(status);
 	}
 }
 
@@ -104,8 +109,9 @@ final class MyPicViewer extends CommandsViewFrame {
 	}
 
 	public MyPicViewer() {
-		super("图片查看器", 800, 600, commands, icons, BorderLayout.NORTH);
+		super("图片查看器", 800, 600, commands, icons);
 		setCommandsEnabled(true, false, false, false, false, true);
+		showCurrentPicture();
 		setVisible(true);
 	}
 
@@ -138,9 +144,12 @@ final class MyPicViewer extends CommandsViewFrame {
 	void showCurrentPicture() {
 		int i = this.pictureIndex;
 		if (i >= 0) {
-			setView(new JLabel(new ImageIcon(this.pictureList[i])));
+			String filename = this.pictureList[i];
+			setView(new JLabel(new ImageIcon(filename)));
+			setStatus(String.format("[%d/%d] %s", i + 1, this.pictureList.length, filename));
 		} else {
 			setView(new JLabel());
+			setStatus("没有加载图片");
 		}
 		setCommandsEnabled(true, i >= 0, i >= 0, i > 0, i + 1 < this.pictureList.length, true);
 	}
