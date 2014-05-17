@@ -1,6 +1,8 @@
 import javax.swing.*;
 import javax.swing.filechooser.*;
+import javax.imageio.*;
 import java.awt.*;
+import java.awt.image.*;
 import java.awt.event.*;
 import java.io.*;
 import java.util.*;
@@ -104,6 +106,10 @@ final class MyPicViewer extends CommandsViewFrame {
 	private String [] pictureList = {};
 	private int pictureIndex = -1;
 
+	private JLabel view;
+	private Image image;
+	private float zoomFactor = 1.0f;
+
 	public static void main(String [] args) {
 		new MyPicViewer();
 	}
@@ -121,6 +127,12 @@ final class MyPicViewer extends CommandsViewFrame {
 		if (command.equals("打开/查找")) {
 			choosePictures();
 			showCurrentPicture();
+		} else if (command.equals("放大")) {
+			this.zoomFactor += 0.1f;
+			refreshView();
+		} else if (command.equals("缩小")) {
+			this.zoomFactor -= 0.1f;
+			refreshView();
 		} else if (command.equals("上一幅")) {
 			this.pictureIndex--;
 			showCurrentPicture();
@@ -145,12 +157,32 @@ final class MyPicViewer extends CommandsViewFrame {
 		int i = this.pictureIndex;
 		if (i >= 0) {
 			String filename = this.pictureList[i];
-			setView(new JLabel(new ImageIcon(filename)));
+			try {
+				this.image = ImageIO.read(new File(filename));
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 			setStatus(String.format("[%d/%d] %s", i + 1, this.pictureList.length, filename));
 		} else {
-			setView(new JLabel());
+			this.image = null;
 			setStatus("没有加载图片");
 		}
 		setCommandsEnabled(true, i >= 0, i >= 0, i > 0, i + 1 < this.pictureList.length, true);
+		this.zoomFactor = 1.0f;
+		refreshView();
+	}
+
+	private void refreshView() {
+		if (this.image == null) {
+			setView(new JLabel());
+		} else {
+			if (this.zoomFactor != 1.0f) {
+				int width = (int) (this.image.getWidth(null) * zoomFactor);
+				int height = (int) (this.image.getHeight(null) * zoomFactor);
+				setView(new JLabel(new ImageIcon(this.image.getScaledInstance(width, height, Image.SCALE_FAST))));
+			} else {
+				setView(new JLabel(new ImageIcon(this.image)));
+			}
+		}
 	}
 }
