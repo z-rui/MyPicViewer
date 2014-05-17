@@ -9,12 +9,12 @@ abstract class CommandsViewFrame extends JFrame implements ActionListener {
 	final JScrollPane scrollpane = new JScrollPane();
 	final JPanel toolbar = new JPanel();
 
-	public CommandsViewFrame(String title, int width, int height, String [] commands, String commandPosition) {
+	public CommandsViewFrame(String title, int width, int height, String [] commands, String [] icons, String commandPosition) {
 		Container cp = this.getContentPane();
 
 		// 工具栏
 		for (int i = 0; i < commands.length; i++) {
-			JButton btn = new JButton(commands[i]);
+			JButton btn = new JButton(commands[i], new ImageIcon(icons[i]));
 			btn.addActionListener(this);
 			this.toolbar.add(btn);
 		}
@@ -29,11 +29,14 @@ abstract class CommandsViewFrame extends JFrame implements ActionListener {
 		setTitle(title);
 	}
 
+	void createToolbar(String [] commands) {
+	}
+
 	public void setView(JComponent view) {
 		this.scrollpane.setViewportView(view);
 	}
 
-	public void setCommandsEnabled(boolean [] enabled) {
+	public void setCommandsEnabled(boolean... enabled) {
 		for (int i = 0; i < enabled.length; i++) {
 			this.toolbar.getComponent(i).setEnabled(enabled[i]);
 		}
@@ -89,44 +92,42 @@ final class MyFilterWrapper extends javax.swing.filechooser.FileFilter implement
 	}
 }
 
-final class MyPicViewer extends CommandsViewFrame implements ActionListener {
-	final static String [] commands = { "打开", "关闭", "放大", "缩小", "上一个", "下一个", };
+final class MyPicViewer extends CommandsViewFrame {
+	final static String [] commands = {"打开/查找", "放大", "缩小", "上一幅", "下一幅", "退出"};
+	final static String [] icons = {"icons/document-open.png", "icons/list-add.png", "icons/list-remove.png", "icons/go-previous.png", "icons/go-next.png", "icons/system-log-out.png"};
 
-	String [] pictureList;
+	String [] pictureList = {};
 	int pictureIndex = -1;
 
 	public static void main(String [] args) {
-		new MyPicViewer().setVisible(true);
+		new MyPicViewer();
 	}
 
 	public MyPicViewer() {
-		super("图片查看器", 800, 600, commands, BorderLayout.NORTH);
-		setCommandsEnabled(new boolean [] {true, false, false, false, false, false});
-	}
-
-	void showPicture(String filename) {
-		if (filename != null) {
-			setView(new JLabel(new ImageIcon(filename)));
-		} else {
-			setView(new JLabel());
-		}
+		super("图片查看器", 800, 600, commands, icons, BorderLayout.NORTH);
+		setCommandsEnabled(true, false, false, false, false, true);
+		setVisible(true);
 	}
 
 	public void actionPerformed(ActionEvent e) { 
 		String command = e.getActionCommand();
 
-		if (command.equals("打开")) {
+		if (command.equals("打开/查找")) {
 			choosePictures();
-		} else if (command.equals("上一个")) {
+			showCurrentPicture();
+		} else if (command.equals("上一幅")) {
 			this.pictureIndex--;
-		} else if (command.equals("下一个")) {
+			showCurrentPicture();
+		} else if (command.equals("下一幅")) {
 			this.pictureIndex++;
+			showCurrentPicture();
+		} else if (command.equals("退出")) {
+			dispose();
 		}
-		showCurrentPicture();
 	}
 
 	void choosePictures() {
-		MyFileChooser fc = new MyFileChooser(new MyFilterWrapper("JPG图片文件", "jpg"));
+		MyFileChooser fc = new MyFileChooser(new MyFilterWrapper("图片文件", "jpg", "png", "gif"));
 		int ret = fc.showOpenDialog(this);
 		if (ret == JFileChooser.APPROVE_OPTION) {
 			this.pictureList = fc.getAbsolutePathsRecursively();
@@ -135,7 +136,12 @@ final class MyPicViewer extends CommandsViewFrame implements ActionListener {
 	}
 
 	void showCurrentPicture() {
-		showPicture((pictureIndex >= 0) ? pictureList[pictureIndex] : null);
-		setCommandsEnabled(new boolean [] {true, false, pictureIndex >= 0, pictureIndex >= 0, pictureIndex > 0, pictureIndex + 1 < pictureList.length});
+		int i = this.pictureIndex;
+		if (i >= 0) {
+			setView(new JLabel(new ImageIcon(this.pictureList[i])));
+		} else {
+			setView(new JLabel());
+		}
+		setCommandsEnabled(true, i >= 0, i >= 0, i > 0, i + 1 < this.pictureList.length, true);
 	}
 }
