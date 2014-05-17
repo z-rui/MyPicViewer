@@ -6,9 +6,9 @@ import java.io.*;
 import java.util.*;
 
 abstract class CommandsViewFrame extends JFrame implements ActionListener {
-	final JScrollPane scrollpane = new JScrollPane();
-	final JToolBar toolbar = new JToolBar();
-	final JLabel status = new JLabel();
+	private final JScrollPane scrollpane = new JScrollPane();
+	private final JToolBar toolbar = new JToolBar();
+	private final JLabel status = new JLabel();
 
 	public CommandsViewFrame(String title, int width, int height, String [] commands, String [] icons) {
 		Container cp = this.getContentPane();
@@ -49,7 +49,7 @@ abstract class CommandsViewFrame extends JFrame implements ActionListener {
 }
 
 final class MyFileChooser extends JFileChooser {
-	final MyFilterWrapper filter;
+	private final MyFilterWrapper filter;
 
 	public MyFileChooser(MyFilterWrapper filter) {
 		this.filter = filter;
@@ -69,7 +69,7 @@ final class MyFileChooser extends JFileChooser {
 		return paths.toArray(new String [] {});
 	}
 
-	void traverse(File [] files, ArrayList<String> paths) {
+	private void traverse(File [] files, ArrayList<String> paths) {
 		for (int i = 0; i < files.length; i++) {
 			File f = files[i];
 			if (f.isDirectory()) {
@@ -82,7 +82,7 @@ final class MyFileChooser extends JFileChooser {
 }
 
 final class MyFilterWrapper extends javax.swing.filechooser.FileFilter implements java.io.FileFilter {
-	final FileNameExtensionFilter filter;
+	private final FileNameExtensionFilter filter;
 
 	public MyFilterWrapper(String description, String... extensions) {
 		this.filter = new FileNameExtensionFilter(description, extensions);
@@ -101,8 +101,8 @@ final class MyPicViewer extends CommandsViewFrame {
 	final static String [] commands = {"打开/查找", "放大", "缩小", "上一幅", "下一幅", "退出"};
 	final static String [] icons = {"icons/document-open.png", "icons/list-add.png", "icons/list-remove.png", "icons/go-previous.png", "icons/go-next.png", "icons/system-log-out.png"};
 
-	String [] pictureList = {};
-	int pictureIndex = -1;
+	private String [] pictureList = {};
+	private int pictureIndex = -1;
 
 	public static void main(String [] args) {
 		new MyPicViewer();
@@ -132,7 +132,7 @@ final class MyPicViewer extends CommandsViewFrame {
 		}
 	}
 
-	void choosePictures() {
+	private void choosePictures() {
 		MyFileChooser fc = new MyFileChooser(new MyFilterWrapper("图片文件", "jpg", "png", "gif"));
 		int ret = fc.showOpenDialog(this);
 		if (ret == JFileChooser.APPROVE_OPTION) {
@@ -141,7 +141,7 @@ final class MyPicViewer extends CommandsViewFrame {
 		}
 	}
 
-	void showCurrentPicture() {
+	private void showCurrentPicture() {
 		int i = this.pictureIndex;
 		if (i >= 0) {
 			String filename = this.pictureList[i];
