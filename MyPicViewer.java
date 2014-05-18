@@ -1,8 +1,6 @@
 import javax.swing.*;
 import javax.swing.filechooser.*;
-import javax.imageio.*;
 import java.awt.*;
-import java.awt.image.*;
 import java.awt.event.*;
 import java.io.*;
 import java.util.ArrayList;
@@ -100,33 +98,19 @@ final class MyFilterWrapper extends javax.swing.filechooser.FileFilter implement
 }
 
 class Picture extends JLabel {
-	private Image image;
-	private float zoomFactor = 1.0f;
-
 	public Picture() {
 		super(null, null, CENTER);
 	}
 
 	public void load(String filename) {
-		try {
-			this.image = ImageIO.read(new File(filename));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		this.zoomFactor = 1.0f;
-		this.setIcon(new ImageIcon(this.image));
+		this.setIcon(new ImageIcon(filename));
 	}
 
 	public void unload() {
-		this.image = null;
 		this.setIcon(null);
 	}
 
 	public void zoom(float factor) {
-		this.zoomFactor += factor;
-		int width = (int) (this.image.getWidth(null) * this.zoomFactor);
-		int height = (int) (this.image.getHeight(null) * this.zoomFactor);
-		this.setIcon(new ImageIcon(this.image.getScaledInstance(width, height, Image.SCALE_FAST)));
 	}
 }
 
