@@ -130,6 +130,50 @@ class Picture extends JLabel {
 	}
 }
 
+class ScrollablePicture extends Picture {
+	private MouseMotionListener dragListener;
+	private Rectangle oldVisibleRect;
+	private Point oldCursorPos;
+
+	public ScrollablePicture() {
+		dragListener = new MouseMotionAdapter () {
+			public void mouseDragged(MouseEvent e) {
+				dragTo(e.getLocationOnScreen());
+			}
+		};
+		addMouseListener(new MouseAdapter() {
+			public void mousePressed(MouseEvent e) {
+				startDragging(e.getLocationOnScreen());
+			}
+			public void mouseReleased(MouseEvent e) {
+				stopDragging();
+			}
+		});
+	}
+
+	private void startDragging(Point cursorPos) {
+		oldVisibleRect = getVisibleRect();
+		oldCursorPos = cursorPos;
+		setCursor(new Cursor(Cursor.MOVE_CURSOR));
+		addMouseMotionListener(dragListener);
+	}
+
+	private void stopDragging() {
+		setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+		removeMouseMotionListener(dragListener);
+	}
+
+	private void dragTo(Point newCursorPos) {
+		int dx = newCursorPos.x - oldCursorPos.x;
+		int dy = newCursorPos.y - oldCursorPos.y;
+		Rectangle newVisibleRect = new Rectangle(oldVisibleRect);
+		newVisibleRect.translate(-dx, -dy);
+		scrollRectToVisible(newVisibleRect);
+		oldCursorPos = newCursorPos;
+		oldVisibleRect = getVisibleRect();
+	}
+}
+
 final class MyPicViewer extends CommandsViewFrame {
 	final static String [] commands = {"打开/查找", "放大", "缩小", "上一幅", "下一幅", "退出"};
 	final static String [] icons = {"icons/document-open.png", "icons/list-add.png", "icons/list-remove.png", "icons/go-previous.png", "icons/go-next.png", "icons/system-log-out.png"};
@@ -137,7 +181,7 @@ final class MyPicViewer extends CommandsViewFrame {
 	private String [] pictureList = {};
 	private int pictureIndex = -1;
 
-	private Picture view = new Picture();
+	private Picture view = new ScrollablePicture();
 
 	public static void main(String [] args) {
 		new MyPicViewer();
