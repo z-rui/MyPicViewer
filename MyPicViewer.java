@@ -151,6 +151,11 @@ class ScrollablePicture extends Picture {
 		});
 	}
 
+	public void load(String filename) {
+		super.load(filename);
+		scrollRectToVisible(new Rectangle()); // 滚动到左上角位置
+	}
+
 	private void startDragging(Point cursorPos) {
 		oldVisibleRect = getVisibleRect();
 		oldCursorPos = cursorPos;
