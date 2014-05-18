@@ -116,7 +116,6 @@ class Picture extends JLabel {
 
 class ScrollablePicture extends Picture {
 	private MouseMotionListener dragListener;
-	private Rectangle oldVisibleRect;
 	private Point oldCursorPos;
 
 	public ScrollablePicture() {
@@ -141,7 +140,6 @@ class ScrollablePicture extends Picture {
 	}
 
 	private void startDragging(Point cursorPos) {
-		oldVisibleRect = getVisibleRect();
 		oldCursorPos = cursorPos;
 		setCursor(new Cursor(Cursor.MOVE_CURSOR));
 		addMouseMotionListener(dragListener);
@@ -155,11 +153,10 @@ class ScrollablePicture extends Picture {
 	private void dragTo(Point newCursorPos) {
 		int dx = newCursorPos.x - oldCursorPos.x;
 		int dy = newCursorPos.y - oldCursorPos.y;
-		Rectangle newVisibleRect = new Rectangle(oldVisibleRect);
-		newVisibleRect.translate(-dx, -dy);
-		scrollRectToVisible(newVisibleRect);
+		Rectangle visibleRect = getVisibleRect();
+		visibleRect.translate(-dx, -dy);
+		scrollRectToVisible(visibleRect);
 		oldCursorPos = newCursorPos;
-		oldVisibleRect = getVisibleRect();
 	}
 }
 
