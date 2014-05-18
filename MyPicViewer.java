@@ -127,7 +127,7 @@ class ToolBarStatusFrame extends JFrame {
 		cp.add(status, BorderLayout.SOUTH);
 	}
 
-	public void setToolBarButtonsEnabled(boolean... enabled) {
+	public void setToolBarComponentsEnabled(boolean... enabled) {
 		for (int i = 0; i < enabled.length; i++) {
 			toolbar.getComponent(i).setEnabled(enabled[i]);
 		}
@@ -160,7 +160,7 @@ final class MyPicViewer extends ToolBarStatusFrame {
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 
 		createToolBarButtons();
-		setToolBarButtonsEnabled(true, false, false, false, false, true);
+		setToolBarComponentsEnabled(true, false, false, false, false, true);
 
 		getContentPane().add(new JScrollPane(view));
 		showCurrentPicture();
@@ -225,6 +225,6 @@ final class MyPicViewer extends ToolBarStatusFrame {
 			this.view.unload();
 			setStatus("没有加载图片");
 		}
-		setToolBarButtonsEnabled(true, i >= 0, i >= 0, i > 0, i + 1 < this.pictureList.length, true);
+		setToolBarComponentsEnabled(true, i >= 0, i >= 0, i > 0, i + 1 < this.pictureList.length, true);
 	}
 }
