@@ -5,7 +5,7 @@ import java.awt.*;
 import java.awt.image.*;
 import java.awt.event.*;
 import java.io.*;
-import java.util.*;
+import java.util.ArrayList;
 
 abstract class CommandsViewFrame extends JFrame implements ActionListener {
 	private final JScrollPane scrollpane = new JScrollPane();
