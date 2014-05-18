@@ -5,49 +5,6 @@ import java.awt.event.*;
 import java.io.*;
 import java.util.ArrayList;
 
-abstract class CommandsViewFrame extends JFrame implements ActionListener {
-	private final JScrollPane scrollpane = new JScrollPane();
-	private final JToolBar toolbar = new JToolBar();
-	private final JLabel status = new JLabel();
-
-	public CommandsViewFrame(String title, int width, int height, String [] commands, String [] icons) {
-		Container cp = this.getContentPane();
-
-		// 工具栏
-		for (int i = 0; i < commands.length; i++) {
-			JButton btn = new JButton(commands[i], new ImageIcon(icons[i]));
-			btn.addActionListener(this);
-			this.toolbar.add(btn);
-		}
-		cp.add(this.toolbar, BorderLayout.NORTH);
-
-		// 工作区
-		cp.add(this.scrollpane, BorderLayout.CENTER);
-
-		// 状态栏
-		cp.add(this.status, BorderLayout.SOUTH);
-
-		// 窗口属性
-		setDefaultCloseOperation(EXIT_ON_CLOSE);
-		setSize(width, height);
-		setTitle(title);
-	}
-
-	public void setView(JComponent view) {
-		this.scrollpane.setViewportView(view);
-	}
-
-	public void setCommandsEnabled(boolean... enabled) {
-		for (int i = 0; i < enabled.length; i++) {
-			this.toolbar.getComponent(i).setEnabled(enabled[i]);
-		}
-	}
-
-	public void setStatus(String status) {
-		this.status.setText(status);
-	}
-}
-
 final class MyFileChooser extends JFileChooser {
 	private final MyFilterWrapper filter;
 
@@ -160,10 +117,34 @@ class ScrollablePicture extends Picture {
 	}
 }
 
-final class MyPicViewer extends CommandsViewFrame {
-	final static String [] commands = {"打开/查找", "放大", "缩小", "上一幅", "下一幅", "退出"};
-	final static String [] icons = {"icons/document-open.png", "icons/list-add.png", "icons/list-remove.png", "icons/go-previous.png", "icons/go-next.png", "icons/system-log-out.png"};
+class ToolBarStatusFrame extends JFrame {
+	private final JToolBar toolbar = new JToolBar();
+	private final JLabel status = new JLabel();
 
+	public ToolBarStatusFrame() {
+		Container cp = getContentPane();
+		cp.add(toolbar, BorderLayout.NORTH);
+		cp.add(status, BorderLayout.SOUTH);
+	}
+
+	public void setToolBarButtonsEnabled(boolean... enabled) {
+		for (int i = 0; i < enabled.length; i++) {
+			toolbar.getComponent(i).setEnabled(enabled[i]);
+		}
+	}
+
+	public void addToolBarComponents(JComponent... comp) {
+		for (int i = 0; i < comp.length; i++) {
+			toolbar.add(comp[i]);
+		}
+	}
+
+	public void setStatus(String statusText) {
+		status.setText(statusText);
+	}
+}
+
+final class MyPicViewer extends ToolBarStatusFrame {
 	private String [] pictureList = {};
 	private int pictureIndex = -1;
 
@@ -174,32 +155,55 @@ final class MyPicViewer extends CommandsViewFrame {
 	}
 
 	public MyPicViewer() {
-		super("图片查看器", 800, 600, commands, icons);
-		setCommandsEnabled(true, false, false, false, false, true);
-		setView(this.view);
+		setTitle("图片查看器");
+		setSize(800, 600);
+		setDefaultCloseOperation(EXIT_ON_CLOSE);
+
+		createToolBarButtons();
+		setToolBarButtonsEnabled(true, false, false, false, false, true);
+
+		getContentPane().add(new JScrollPane(view));
 		showCurrentPicture();
+
 		setVisible(true);
 	}
 
-	public void actionPerformed(ActionEvent e) { 
-		String command = e.getActionCommand();
-
-		if (command.equals("打开/查找")) {
-			choosePictures();
-			showCurrentPicture();
-		} else if (command.equals("放大")) {
-			this.view.zoom(+0.1f);
-		} else if (command.equals("缩小")) {
-			this.view.zoom(-0.1f);
-		} else if (command.equals("上一幅")) {
-			this.pictureIndex--;
-			showCurrentPicture();
-		} else if (command.equals("下一幅")) {
-			this.pictureIndex++;
-			showCurrentPicture();
-		} else if (command.equals("退出")) {
-			dispose();
+	private class ToolbarButton extends JButton {
+		public ToolbarButton(String text, String icon, ActionListener l) {
+			super(text, new ImageIcon(icon));
+			addActionListener(l);
 		}
+	}
+
+	private void createToolBarButtons() {
+		addToolBarComponents(new ToolbarButton("打开/查找", "icons/document-open.png", new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				choosePictures();
+				showCurrentPicture();
+			}
+		}), new ToolbarButton("放大", "icons/list-add.png", new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				view.zoom(+0.1f);
+			}
+		}), new ToolbarButton("缩小", "icons/list-remove.png", new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				view.zoom(-0.1f);
+			}
+		}), new ToolbarButton("上一幅", "icons/go-previous.png", new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				pictureIndex--;
+				showCurrentPicture();
+			}
+		}), new ToolbarButton("下一幅", "icons/go-next.png", new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				pictureIndex++;
+				showCurrentPicture();
+			}
+		}), new ToolbarButton("退出", "icons/system-log-out.png", new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				dispose();
+			}
+		}));
 	}
 
 	private void choosePictures() {
@@ -221,6 +225,6 @@ final class MyPicViewer extends CommandsViewFrame {
 			this.view.unload();
 			setStatus("没有加载图片");
 		}
-		setCommandsEnabled(true, i >= 0, i >= 0, i > 0, i + 1 < this.pictureList.length, true);
+		setToolBarButtonsEnabled(true, i >= 0, i >= 0, i > 0, i + 1 < this.pictureList.length, true);
 	}
 }
