@@ -106,7 +106,7 @@ final class MyPicViewer extends CommandsViewFrame {
 	private String [] pictureList = {};
 	private int pictureIndex = -1;
 
-	private JLabel view;
+	private JLabel view = new JLabel(null, null, JLabel.CENTER);
 	private Image image;
 	private float zoomFactor = 1.0f;
 
@@ -117,6 +117,7 @@ final class MyPicViewer extends CommandsViewFrame {
 	public MyPicViewer() {
 		super("图片查看器", 800, 600, commands, icons);
 		setCommandsEnabled(true, false, false, false, false, true);
+		setView(this.view);
 		showCurrentPicture();
 		setVisible(true);
 	}
@@ -174,14 +175,14 @@ final class MyPicViewer extends CommandsViewFrame {
 
 	private void refreshView() {
 		if (this.image == null) {
-			setView(new JLabel());
+			this.view.setIcon(null);
 		} else {
 			if (this.zoomFactor != 1.0f) {
 				int width = (int) (this.image.getWidth(null) * zoomFactor);
 				int height = (int) (this.image.getHeight(null) * zoomFactor);
-				setView(new JLabel(new ImageIcon(this.image.getScaledInstance(width, height, Image.SCALE_FAST))));
+				this.view.setIcon(new ImageIcon(this.image.getScaledInstance(width, height, Image.SCALE_FAST)));
 			} else {
-				setView(new JLabel(new ImageIcon(this.image)));
+				this.view.setIcon(new ImageIcon(this.image));
 			}
 		}
 	}
