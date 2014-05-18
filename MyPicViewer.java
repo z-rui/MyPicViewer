@@ -99,6 +99,37 @@ final class MyFilterWrapper extends javax.swing.filechooser.FileFilter implement
 	}
 }
 
+class Picture extends JLabel {
+	private Image image;
+	private float zoomFactor = 1.0f;
+
+	public Picture() {
+		super(null, null, CENTER);
+	}
+
+	public void load(String filename) {
+		try {
+			this.image = ImageIO.read(new File(filename));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		this.zoomFactor = 1.0f;
+		this.setIcon(new ImageIcon(this.image));
+	}
+
+	public void unload() {
+		this.image = null;
+		this.setIcon(null);
+	}
+
+	public void zoom(float factor) {
+		this.zoomFactor += factor;
+		int width = (int) (this.image.getWidth(null) * this.zoomFactor);
+		int height = (int) (this.image.getHeight(null) * this.zoomFactor);
+		this.setIcon(new ImageIcon(this.image.getScaledInstance(width, height, Image.SCALE_FAST)));
+	}
+}
+
 final class MyPicViewer extends CommandsViewFrame {
 	final static String [] commands = {"打开/查找", "放大", "缩小", "上一幅", "下一幅", "退出"};
 	final static String [] icons = {"icons/document-open.png", "icons/list-add.png", "icons/list-remove.png", "icons/go-previous.png", "icons/go-next.png", "icons/system-log-out.png"};
@@ -106,9 +137,7 @@ final class MyPicViewer extends CommandsViewFrame {
 	private String [] pictureList = {};
 	private int pictureIndex = -1;
 
-	private JLabel view = new JLabel(null, null, JLabel.CENTER);
-	private Image image;
-	private float zoomFactor = 1.0f;
+	private Picture view = new Picture();
 
 	public static void main(String [] args) {
 		new MyPicViewer();
@@ -129,11 +158,9 @@ final class MyPicViewer extends CommandsViewFrame {
 			choosePictures();
 			showCurrentPicture();
 		} else if (command.equals("放大")) {
-			this.zoomFactor += 0.1f;
-			refreshView();
+			this.view.zoom(+0.1f);
 		} else if (command.equals("缩小")) {
-			this.zoomFactor -= 0.1f;
-			refreshView();
+			this.view.zoom(-0.1f);
 		} else if (command.equals("上一幅")) {
 			this.pictureIndex--;
 			showCurrentPicture();
@@ -158,32 +185,12 @@ final class MyPicViewer extends CommandsViewFrame {
 		int i = this.pictureIndex;
 		if (i >= 0) {
 			String filename = this.pictureList[i];
-			try {
-				this.image = ImageIO.read(new File(filename));
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+			this.view.load(filename);
 			setStatus(String.format("[%d/%d] %s", i + 1, this.pictureList.length, filename));
 		} else {
-			this.image = null;
+			this.view.unload();
 			setStatus("没有加载图片");
 		}
 		setCommandsEnabled(true, i >= 0, i >= 0, i > 0, i + 1 < this.pictureList.length, true);
-		this.zoomFactor = 1.0f;
-		refreshView();
-	}
-
-	private void refreshView() {
-		if (this.image == null) {
-			this.view.setIcon(null);
-		} else {
-			if (this.zoomFactor != 1.0f) {
-				int width = (int) (this.image.getWidth(null) * zoomFactor);
-				int height = (int) (this.image.getHeight(null) * zoomFactor);
-				this.view.setIcon(new ImageIcon(this.image.getScaledInstance(width, height, Image.SCALE_FAST)));
-			} else {
-				this.view.setIcon(new ImageIcon(this.image));
-			}
-		}
 	}
 }
