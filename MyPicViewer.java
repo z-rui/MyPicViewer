@@ -74,7 +74,7 @@ final class MyFileChooser extends JFileChooser {
 			File f = files[i];
 			if (f.isDirectory()) {
 				traverse(f.listFiles(this.filter), paths);
-			} else {
+			} else if (f.isFile() && this.filter.accept(f)) {
 				paths.add(f.getAbsolutePath());
 			}
 		}
