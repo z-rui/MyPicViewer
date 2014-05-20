@@ -75,6 +75,7 @@ class ZoomablePicture extends JComponent {
 		zoomFactor = 1.0f;
 		setPreferredSize(new Dimension(width, height));
 		revalidate();
+		repaint();
 	}
 
 	public void unload() {
