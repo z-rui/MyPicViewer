@@ -1,6 +1,7 @@
 import javax.swing.*;
 import javax.swing.filechooser.*;
 import java.awt.*;
+import java.awt.image.*;
 import java.awt.event.*;
 import java.io.*;
 import java.util.ArrayList;
@@ -54,24 +55,62 @@ final class MyFilterWrapper extends javax.swing.filechooser.FileFilter implement
 	}
 }
 
-class Picture extends JLabel {
-	public Picture() {
-		super(null, null, CENTER);
-	}
+class ZoomablePicture extends JComponent {
+	private Image image;
+	private int width, height;
+	private float zoomFactor;
 
 	public void load(String filename) {
-		this.setIcon(new ImageIcon(filename));
+		unload();
+		image = Toolkit.getDefaultToolkit().getImage(filename);
+		MediaTracker mt = new MediaTracker(this);
+		mt.addImage(image, 0);
+		try {
+			mt.waitForAll();
+		} catch (InterruptedException ex) {
+			ex.printStackTrace();
+		}
+		width = image.getWidth(null);
+		height = image.getHeight(null);
+		zoomFactor = 1.0f;
+		setPreferredSize(new Dimension(width, height));
+		revalidate();
 	}
 
 	public void unload() {
-		this.setIcon(null);
+		if (image != null) {
+			image.flush();
+			image = null;
+			setPreferredSize(new Dimension(1, 1));
+			revalidate();
+			repaint();
+		}
 	}
 
-	public void zoom(float factor) {
+	public void setZoomFactor(float factor) {
+		zoomFactor = factor;
+		setPreferredSize(new Dimension((int) (width * zoomFactor), (int) (height * zoomFactor)));
+		revalidate();
+		repaint();
+	}
+
+	public float getZoomFactor() {
+		return zoomFactor;
+	}
+
+	public void paintComponent(Graphics g) {
+		super.paintComponent(g);
+		if (image != null) {
+			int ws = getWidth();
+			int hs = getHeight();
+			int wp = getPreferredSize().width;
+			int hp = getPreferredSize().height;
+			g.drawImage(image, (ws - wp) / 2, (hs - hp) / 2, wp, hp, null);
+		}
 	}
 }
 
-class ScrollablePicture extends Picture {
+class ScrollablePicture extends ZoomablePicture {
 	private MouseMotionListener dragListener;
 	private Point oldCursorPos;
 
@@ -148,7 +187,7 @@ final class MyPicViewer extends ToolBarStatusFrame {
 	private String [] pictureList = {};
 	private int pictureIndex = -1;
 
-	private Picture view = new ScrollablePicture();
+	private ZoomablePicture view = new ScrollablePicture();
 
 	public static void main(String [] args) {
 		new MyPicViewer();
@@ -183,11 +222,11 @@ final class MyPicViewer extends ToolBarStatusFrame {
 			}
 		}), new ToolbarButton("放大", "icons/list-add.png", new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				view.zoom(+0.1f);
+				view.setZoomFactor(view.getZoomFactor() * 1.1f);
 			}
 		}), new ToolbarButton("缩小", "icons/list-remove.png", new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				view.zoom(-0.1f);
+				view.setZoomFactor(view.getZoomFactor() * 0.9f);
 			}
 		}), new ToolbarButton("上一幅", "icons/go-previous.png", new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
