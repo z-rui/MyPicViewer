@@ -112,15 +112,14 @@ class ZoomablePicture extends JComponent {
 }
 
 class ScrollablePicture extends ZoomablePicture {
-	private MouseMotionListener dragListener;
 	private Point oldCursorPos;
 
 	public ScrollablePicture() {
-		dragListener = new MouseMotionAdapter () {
+		addMouseMotionListener(new MouseMotionAdapter () {
 			public void mouseDragged(MouseEvent e) {
 				dragTo(e.getLocationOnScreen());
 			}
-		};
+		});
 		addMouseListener(new MouseAdapter() {
 			public void mousePressed(MouseEvent e) {
 				startDragging(e.getLocationOnScreen());
@@ -139,12 +138,10 @@ class ScrollablePicture extends ZoomablePicture {
 	private void startDragging(Point cursorPos) {
 		oldCursorPos = cursorPos;
 		setCursor(new Cursor(Cursor.MOVE_CURSOR));
-		addMouseMotionListener(dragListener);
 	}
 
 	private void stopDragging() {
 		setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
-		removeMouseMotionListener(dragListener);
 	}
 
 	private void dragTo(Point newCursorPos) {
