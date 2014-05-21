@@ -80,7 +80,6 @@ class ZoomablePicture extends JComponent {
 
 	public void unload() {
 		if (image != null) {
-			image.flush();
 			image = null;
 			setPreferredSize(new Dimension(1, 1));
 			revalidate();
